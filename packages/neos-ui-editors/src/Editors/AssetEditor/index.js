@@ -16,7 +16,7 @@ const DEFAULT_FEATURES = {
 };
 
 @neos(globalRegistry => ({
-    assetLookupDataLoader: globalRegistry.get('dataLoaders').get('NeosAssetLookup'),
+    assetLookupDataLoader: globalRegistry.get('dataLoaders').get('AssetLookup'),
     i18nRegistry: globalRegistry.get('i18n'),
     secondaryEditorsRegistry: globalRegistry.get('inspector').get('secondaryEditors')
 }))
