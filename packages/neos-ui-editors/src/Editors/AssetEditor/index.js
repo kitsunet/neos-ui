@@ -194,76 +194,84 @@ export default class AssetEditor extends PureComponent {
 
     renderAssetUpload() {
         if (!this.isFeatureEnabled('upload')) {
-            return null;
+            return this.renderAssetSelect();
         }
 
-        const disabled = $get('options.disabled', this.props);
         const accept = $get('options.accept', this.props);
+        const multiple = $get('options.multiple', this.props);
         const {className} = this.props;
 
-        if (this.props.options.multiple) {
-            return (
-                <AssetUpload
-                    className={className}
-                    multiple={true}
-                    multipleData={this.props.value}
-                    onAfterUpload={this.handleValuesChange}
-                    ref={this.setAssetUploadReference}
-                    isLoading={false}
-                    imagesOnly={this.props.imagesOnly}
-                    accept={accept}
-                    >
-                    <MultiSelectBox
-                        dndType={dndTypes.MULTISELECT}
-                        optionValueField="identifier"
-                        loadingLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:loading')}
-                        displaySearchBox={true}
-                        ListPreviewElement={AssetOption}
-                        placeholder={this.props.i18nRegistry.translate(this.props.placeholder)}
-                        options={this.state.options || []}
-                        values={this.getValues()}
-                        onValuesChange={this.handleValuesChange}
-                        displayLoadingIndicator={this.state.isLoading}
-                        searchOptions={this.state.searchOptions}
-                        showDropDownToggle={false}
-                        onSearchTermChange={this.handleSearchTermChange}
-                        noMatchesFoundLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:noMatchesFound')}
-                        searchBoxLeftToTypeLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:searchBoxLeftToType')}
-                        threshold={$get('options.threshold', this.props)}
-                        disabled={disabled}
-                        />
-                </AssetUpload>
-            );
-        }
         return (
             <AssetUpload
                 className={className}
-                multiple={false}
-                onAfterUpload={this.handleValueChange}
+                multiple={multiple}
+                multipleData={multiple && this.props.value}
+                onAfterUpload={this.handleValuesChange}
                 ref={this.setAssetUploadReference}
                 isLoading={false}
                 imagesOnly={this.props.imagesOnly}
                 accept={accept}
-                >
-                <SelectBox
-                    optionValueField="identifier"
-                    loadingLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:loading')}
-                    displaySearchBox={true}
-                    ListPreviewElement={AssetOption}
-                    placeholder={this.props.i18nRegistry.translate(this.props.placeholder)}
-                    options={this.props.value ? this.state.options : this.state.searchOptions}
-                    value={this.getValue()}
-                    onValueChange={this.handleValueChange}
-                    displayLoadingIndicator={this.state.isLoading}
-                    showDropDownToggle={false}
-                    allowEmpty={true}
-                    onSearchTermChange={this.handleSearchTermChange}
-                    noMatchesFoundLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:noMatchesFound')}
-                    searchBoxLeftToTypeLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:searchBoxLeftToType')}
-                    threshold={$get('options.threshold', this.props)}
-                    disabled={disabled}
-                    />
+            >
+                {this.renderAssetSelect()}
             </AssetUpload>
+        );
+    }
+
+    renderAssetSelect() {
+        if (this.props.options.multiple) {
+            return this.renderMultiSelect();
+        }
+        return this.renderSingleSelect();
+    }
+
+    renderMultiSelect() {
+        const disabled = $get('options.disabled', this.props);
+
+        return (
+            <MultiSelectBox
+                dndType={dndTypes.MULTISELECT}
+                optionValueField="identifier"
+                loadingLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:loading')}
+                displaySearchBox={true}
+                ListPreviewElement={AssetOption}
+                placeholder={this.props.i18nRegistry.translate(this.props.placeholder)}
+                options={this.state.options || []}
+                values={this.getValues()}
+                onValuesChange={this.handleValuesChange}
+                displayLoadingIndicator={this.state.isLoading}
+                searchOptions={this.state.searchOptions}
+                showDropDownToggle={false}
+                onSearchTermChange={this.handleSearchTermChange}
+                noMatchesFoundLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:noMatchesFound')}
+                searchBoxLeftToTypeLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:searchBoxLeftToType')}
+                threshold={$get('options.threshold', this.props)}
+                disabled={disabled}
+            />
+        );
+    }
+
+    renderSingleSelect() {
+        const disabled = $get('options.disabled', this.props);
+
+        return (
+            <SelectBox
+                optionValueField="identifier"
+                loadingLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:loading')}
+                displaySearchBox={true}
+                ListPreviewElement={AssetOption}
+                placeholder={this.props.i18nRegistry.translate(this.props.placeholder)}
+                options={this.props.value ? this.state.options : this.state.searchOptions}
+                value={this.getValue()}
+                onValueChange={this.handleValueChange}
+                displayLoadingIndicator={this.state.isLoading}
+                showDropDownToggle={false}
+                allowEmpty={true}
+                onSearchTermChange={this.handleSearchTermChange}
+                noMatchesFoundLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:noMatchesFound')}
+                searchBoxLeftToTypeLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:searchBoxLeftToType')}
+                threshold={$get('options.threshold', this.props)}
+                disabled={disabled}
+            />
         );
     }
 
