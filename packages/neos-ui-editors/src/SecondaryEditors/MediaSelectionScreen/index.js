@@ -10,7 +10,8 @@ class MediaSelectionScreen extends PureComponent {
     static propTypes = {
         onComplete: PropTypes.func.isRequired,
         neos: PropTypes.object.isRequired,
-        type: PropTypes.oneOf(['assets', 'images']).isRequired
+        type: PropTypes.oneOf(['assets', 'images']).isRequired,
+        constraints: PropTypes.object
     };
 
     static defaultProps = {
@@ -18,17 +19,23 @@ class MediaSelectionScreen extends PureComponent {
     };
 
     render() {
-        const {onComplete, neos, type} = this.props;
+        const {onComplete, neos, type, constraints} = this.props;
         window.NeosMediaBrowserCallbacks = {
             assetChosen: assetIdentifier => {
                 onComplete(assetIdentifier);
             }
         };
 
+        // Add typeFilter if legacy "type" was defined
+        const constraintsFinal = (type === 'images') ? Object.assign({}, constraints, {typeFilter: 'Image'}) : constraints;
+
+        const constraintUriString = encodeURIComponent(JSON.stringify(constraintsFinal));
         const mediaBrowserUri = $get('routes.core.modules.mediaBrowser', neos);
 
         return (
-            <iframe name="neos-media-selection-screen" src={`${mediaBrowserUri}/${type}.html`} className={style.iframe}/>
+            <iframe name="neos-media-selection-screen"
+                    src={`${mediaBrowserUri}/assets/index.html?browserConstraints=${constraintUriString}`}
+                    className={style.iframe}/>
         );
     }
 }

@@ -156,12 +156,10 @@ export default class AssetEditor extends PureComponent {
     }
 
     handleChooseFromMedia = () => {
-        const {secondaryEditorsRegistry} = this.props;
+        const {secondaryEditorsRegistry, options} = this.props;
         const {component: MediaSelectionScreen} = secondaryEditorsRegistry.get('Neos.Neos/Inspector/Secondary/Editors/MediaSelectionScreen');
 
-        this.props.renderSecondaryInspector('IMAGE_SELECT_MEDIA', () =>
-            <MediaSelectionScreen onComplete={this.handleMediaSelected}/>
-        );
+        this.props.renderSecondaryInspector('IMAGE_SELECT_MEDIA', () => <MediaSelectionScreen constraints={options.constraints ? options.constraints : {}} onComplete={this.handleMediaSelected}/>);
     }
 
     handleMediaSelected = assetIdentifier => {
