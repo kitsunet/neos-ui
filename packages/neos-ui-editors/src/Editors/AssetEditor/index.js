@@ -106,7 +106,8 @@ export default class AssetEditor extends PureComponent {
     handleSearchTermChange = searchTerm => {
         if (searchTerm) {
             this.setState({isLoading: true, searchOptions: []});
-            this.props.assetLookupDataLoader.search({assetsToExclude: this.getValues()}, searchTerm)
+            const assetSourceSearchLimitation = this.props.options.assetSourceSearchLimitation || '';
+            this.props.assetLookupDataLoader.search({__assetSourceIdentifier: assetSourceSearchLimitation, assetsToExclude: this.getValues()}, searchTerm)
                 .then(searchOptions => {
                     this.setState({
                         isLoading: false,
@@ -126,7 +127,13 @@ export default class AssetEditor extends PureComponent {
 
     handleValueChange = value => {
         this.setState({searchOptions: []});
-        this.props.commit(Array.isArray(value) ? this.getIdentity(value[0]) : this.getIdentity(value));
+        const {assetProxyImport} = backend.get().endpoints;
+
+        const valuePromise = (value.indexOf('/') === -1) ? Promise.resolve(value) : assetProxyImport(value);
+        valuePromise.then(value => {
+            this.props.commit(this.getIdentity(value));
+            this.setState({isLoading: false});
+        });
     }
 
     handleValuesChange = values => {

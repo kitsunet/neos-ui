@@ -215,9 +215,10 @@ manifest('main.dataloaders', {}, globalRegistry => {
                 }
                 this._debounceTimer = window.setTimeout(resolve, 300);
             }).then(() => {
+                const assetSourceIdentifier = options.__assetSourceIdentifier || '';
                 // Trigger query
                 const assetProxySearchApi = backend.get().endpoints.assetProxySearch;
-                const resultPromise = assetProxySearchApi(searchTerm, '', options);
+                const resultPromise = assetProxySearchApi(searchTerm, assetSourceIdentifier, options);
 
                 this._lru().set(cacheKey, resultPromise);
 
