@@ -128,8 +128,8 @@ export default class AssetEditor extends PureComponent {
     handleValueChange = value => {
         this.setState({searchOptions: []});
         const {assetProxyImport} = backend.get().endpoints;
-
         const valuePromise = (value.indexOf('/') === -1) ? Promise.resolve(value) : assetProxyImport(value);
+
         valuePromise.then(value => {
             this.props.commit(this.getIdentity(value));
             this.setState({isLoading: false});
@@ -154,9 +154,9 @@ export default class AssetEditor extends PureComponent {
             });
         } else {
             const value = values;
-            const valuePromise = (value.indexOf('/') === -1) ? Promise.resolve(value) : assetProxyImport(value);
+            const valuePromise = (typeof value === 'object' || value instanceof Object || value.indexOf('/') === -1) ? Promise.resolve(value) : assetProxyImport(value);
             valuePromise.then(value => {
-                this.props.commit(value.map(this.getIdentity));
+                this.props.commit(this.getIdentity(value));
                 this.setState({isLoading: false});
             });
         }
@@ -197,24 +197,24 @@ export default class AssetEditor extends PureComponent {
         );
     }
 
-    renderAssetUpload() {
+    renderAssetSelectorAndUpload() {
+        const accept = $get('options.accept', this.props);
+        const multiple = $get('options.multiple', this.props);
+        const {className, imagesOnly, value} = this.props;
+
         if (!this.isFeatureEnabled('upload')) {
             return this.renderAssetSelect();
         }
-
-        const accept = $get('options.accept', this.props);
-        const multiple = $get('options.multiple', this.props);
-        const {className} = this.props;
 
         return (
             <AssetUpload
                 className={className}
                 multiple={multiple}
-                multipleData={multiple && this.props.value}
+                multipleData={multiple ? value : []}
                 onAfterUpload={this.handleValuesChange}
                 ref={this.setAssetUploadReference}
                 isLoading={false}
-                imagesOnly={this.props.imagesOnly}
+                imagesOnly={imagesOnly}
                 accept={accept}
             >
                 {this.renderAssetSelect()}
@@ -223,39 +223,12 @@ export default class AssetEditor extends PureComponent {
     }
 
     renderAssetSelect() {
-        if (this.props.options.multiple) {
-            return this.renderMultiSelect();
-        }
-        return this.renderSingleSelect();
+        const multiple = $get('options.multiple', this.props);
+
+        return multiple ? this.renderAssetMultiSelect() : this.renderAssetSingleSelect();
     }
 
-    renderMultiSelect() {
-        const disabled = $get('options.disabled', this.props);
-
-        return (
-            <MultiSelectBox
-                dndType={dndTypes.MULTISELECT}
-                optionValueField="identifier"
-                loadingLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:loading')}
-                displaySearchBox={true}
-                ListPreviewElement={AssetOption}
-                placeholder={this.props.i18nRegistry.translate(this.props.placeholder)}
-                options={this.state.options || []}
-                values={this.getValues()}
-                onValuesChange={this.handleValuesChange}
-                displayLoadingIndicator={this.state.isLoading}
-                searchOptions={this.state.searchOptions}
-                showDropDownToggle={false}
-                onSearchTermChange={this.handleSearchTermChange}
-                noMatchesFoundLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:noMatchesFound')}
-                searchBoxLeftToTypeLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:searchBoxLeftToType')}
-                threshold={$get('options.threshold', this.props)}
-                disabled={disabled}
-            />
-        );
-    }
-
-    renderSingleSelect() {
+    renderAssetSingleSelect() {
         const disabled = $get('options.disabled', this.props);
 
         return (
@@ -280,10 +253,37 @@ export default class AssetEditor extends PureComponent {
         );
     }
 
+    renderAssetMultiSelect() {
+        const disabled = $get('options.disabled', this.props);
+
+        return (
+            <MultiSelectBox
+                dndType={dndTypes.MULTISELECT}
+                optionValueField="identifier"
+                loadingLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:loading')}
+                displaySearchBox={true}
+                ListPreviewElement={AssetOption}
+                placeholder={this.props.i18nRegistry.translate(this.props.placeholder)}
+                options={this.state.options || []}
+                values={this.getValues()}
+                onValuesChange={this.handleValuesChange}
+                displayLoadingIndicator={this.state.isLoading}
+                searchOptions={this.state.searchOptions}
+                showDropDownToggle={false}
+                allowEmpty={true}
+                onSearchTermChange={this.handleSearchTermChange}
+                noMatchesFoundLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:noMatchesFound')}
+                searchBoxLeftToTypeLabel={this.props.i18nRegistry.translate('Neos.Neos:Main:searchBoxLeftToType')}
+                threshold={$get('options.threshold', this.props)}
+                disabled={disabled}
+            />
+        );
+    }
+
     render() {
         return (
             <div>
-                {this.renderAssetUpload()}
+                {this.renderAssetSelectorAndUpload()}
                 {this.renderControls()}
             </div>
         );
